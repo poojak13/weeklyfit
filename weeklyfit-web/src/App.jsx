@@ -15,6 +15,14 @@ const PROVIDER_NAMES = {
   claude: 'Claude',
 }
 
+const MEAL_OPTIONS = [
+    { n:1, l:'Breakfast only',              d:'Just breakfast — great if you meal prep mornings.',                          slots:['breakfast'],              leftoverLunch:false },
+    { n:2, l:'Lunch only',                  d:'Just lunch — cooked fresh each day.',                                        slots:['lunch'],                  leftoverLunch:false },
+    { n:3, l:'Dinner only',                 d:'One solid dinner each night. You handle the rest.',                          slots:['dinner'],                  leftoverLunch:false },
+    { n:4, l:'Lunch (leftovers) + Dinner',  d:"Cook dinner once — next day's lunch is last night's dinner. Zero extra cooking.", slots:['lunch','dinner'],    leftoverLunch:true  },
+    { n:5, l:'All 3 meals',                 d:'Breakfast + fresh cooked lunch + dinner. Full day coverage.',                slots:['breakfast','lunch','dinner'], leftoverLunch:false },
+  ]
+
 function Badge({ color, children }) {
   return <span style={{ fontSize: 11, fontWeight: 700, background: color, color: '#fff', padding: '2px 8px', borderRadius: 99, marginLeft: 4 }}>{children}</span>
 }
@@ -54,13 +62,6 @@ function Onboarding({ onDone }) {
     })
   }
 
-  const MEAL_OPTIONS = [
-    { n:1, l:'Breakfast only',              d:'Just breakfast — great if you meal prep mornings.',                          slots:['breakfast'],              leftoverLunch:false },
-    { n:2, l:'Lunch only',                  d:'Just lunch — cooked fresh each day.',                                        slots:['lunch'],                  leftoverLunch:false },
-    { n:3, l:'Dinner only',                 d:'One solid dinner each night. You handle the rest.',                          slots:['dinner'],                  leftoverLunch:false },
-    { n:4, l:'Lunch (leftovers) + Dinner',  d:"Cook dinner once — next day's lunch is last night's dinner. Zero extra cooking.", slots:['lunch','dinner'],    leftoverLunch:true  },
-    { n:5, l:'All 3 meals',                 d:'Breakfast + fresh cooked lunch + dinner. Full day coverage.',                slots:['breakfast','lunch','dinner'], leftoverLunch:false },
-  ]
 
   const setMeals = n => {
     const opt = MEAL_OPTIONS.find(o => o.n === n)
