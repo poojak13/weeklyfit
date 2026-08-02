@@ -8,6 +8,13 @@ function Chip({ on, onClick, children }) {
   return <button style={chip(on)} onClick={onClick}>{children}</button>
 }
 
+const PROVIDER_NAMES = {
+  groq: 'Groq',
+  openrouter: 'OpenRouter',
+  gemini: 'Gemini',
+  claude: 'Claude',
+}
+
 function Badge({ color, children }) {
   return <span style={{ fontSize: 11, fontWeight: 700, background: color, color: '#fff', padding: '2px 8px', borderRadius: 99, marginLeft: 4 }}>{children}</span>
 }
@@ -54,6 +61,45 @@ function Onboarding({ onDone }) {
 
   const steps = [
     {
+      title: 'Choose your AI',
+      body: (
+        <div style={s.grid(14)}>
+          <p style={{ color: T.sub, fontSize: 14, margin: 0 }}>WeeklyFit uses AI to generate your meal and workout plans. Pick a provider and paste your free API key to get started.</p>
+          <div>
+            <span style={s.lbl}>Provider</span>
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+              {[['groq','Groq (free ⚡ fastest)'],['openrouter','OpenRouter (free)'],['gemini','Gemini (free)'],['claude','Claude']].map(([id, label]) => (
+                <Chip key={id} on={p.apiProvider === id} onClick={() => up({ apiProvider: id })}>{label}</Chip>
+              ))}
+            </div>
+          </div>
+          <div>
+            <span style={s.lbl}>API Key</span>
+            <input style={s.inp}
+              type="text"
+              placeholder={
+                p.apiProvider === 'groq' ? 'gsk_… — get free key at console.groq.com' :
+                p.apiProvider === 'openrouter' ? 'sk-or-… — get free key at openrouter.ai/keys' :
+                p.apiProvider === 'gemini' ? 'AIza… — get free key at aistudio.google.com/app/apikey' :
+                'sk-ant-… — get key at console.anthropic.com'
+              }
+              value={p.apiKey||''}
+              onChange={e => up({ apiKey: e.target.value })}
+            />
+            <div style={{ fontSize: 12, color: T.sub, marginTop: 8 }}>
+              {p.apiProvider === 'groq' ? '⚡ Fastest — 2-3 sec per plan. Completely free, no billing, no credit card.' :
+               p.apiProvider === 'openrouter' ? '🔀 Access to 10+ free models. No billing ever.' :
+               p.apiProvider === 'gemini' ? '✅ Free tier — 1,500 requests/day. No billing needed.' :
+               '✅ Best quality. Paid usage — console.anthropic.com'}
+            </div>
+          </div>
+          <div style={{ ...s.card, background: '#F0F7F1', borderColor: '#C5DFC8', fontSize: 13, color: T.sub }}>
+            🔒 Your key is stored only in your browser. Never sent to any server except the AI provider you choose.
+          </div>
+        </div>
+      )
+    },
+    {
       title: 'Your background & diet',
       body: (
         <div style={s.grid(16)}>
@@ -88,8 +134,10 @@ function Onboarding({ onDone }) {
     },
     {
       title: 'Goal & body',
+      skipLabel: 'Skip for now',
       body: (
         <div style={s.grid(14)}>
+          <p style={{ color: T.sub, fontSize: 14, margin: 0 }}>Optional — helps us set the right calorie targets and protein goals. You can fill this in later from Settings.</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <span style={s.lbl}>Current weight (kg)</span>
@@ -101,12 +149,12 @@ function Onboarding({ onDone }) {
             </div>
           </div>
           <div>
-            <span style={s.lbl}>Weight loss goal</span>
+            <span style={s.lbl}>Weight loss goal <span style={{ fontWeight: 400, color: T.sub, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></span>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
               <span>Lose</span>
-              <input style={{ ...s.inp, width: 70 }} inputMode="decimal" value={p.goalKg||''} onChange={e => up({ goalKg: e.target.value })} />
+              <input style={{ ...s.inp, width: 70 }} inputMode="decimal" placeholder="e.g. 6" value={p.goalKg||''} onChange={e => up({ goalKg: e.target.value })} />
               <span>kg in</span>
-              <input style={{ ...s.inp, width: 60 }} inputMode="numeric" value={p.goalMonths||''} onChange={e => up({ goalMonths: e.target.value })} />
+              <input style={{ ...s.inp, width: 60 }} inputMode="numeric" placeholder="e.g. 3" value={p.goalMonths||''} onChange={e => up({ goalMonths: e.target.value })} />
               <span>months</span>
             </div>
           </div>
@@ -224,11 +272,17 @@ function Onboarding({ onDone }) {
         </div>
         <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 14px', color: T.ink }}>{steps[step].title}</h2>
         {steps[step].body}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 22 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 22, alignItems: 'center' }}>
           <button style={{ ...s.ghost, visibility: step ? 'visible' : 'hidden' }} onClick={() => setStep(s => s - 1)}>Back</button>
-          {step < steps.length - 1
-            ? <button style={s.btn} onClick={() => setStep(s => s + 1)}>Next</button>
-            : <button style={s.btn} onClick={() => onDone(p)}>Let's go →</button>}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            {steps[step].skipLabel && (
+              <button style={{ background: 'none', border: 'none', color: T.sub, cursor: 'pointer', fontSize: 14, fontFamily: 'inherit' }}
+                onClick={() => setStep(s => s + 1)}>{steps[step].skipLabel}</button>
+            )}
+            {step < steps.length - 1
+              ? <button style={s.btn} onClick={() => setStep(s => s + 1)}>Next</button>
+              : <button style={s.btn} onClick={() => onDone(p)}>Let's go →</button>}
+          </div>
         </div>
       </div>
     </div>
@@ -325,7 +379,13 @@ export default function App() {
 
   if (!loaded) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: T.paper }}>Loading…</div>
 
-  if (!profile.onboarded) return <Onboarding onDone={p => { persist({ ...p, onboarded: true }) }} />
+  if (!profile.onboarded) return <Onboarding onDone={p => {
+              if (p.apiKey) saveApiKey(p.apiKey)
+              if (p.apiProvider) saveApiProvider(p.apiProvider)
+              setApiKey(p.apiKey || '')
+              setApiProvider(p.apiProvider || 'groq')
+              persist({ ...p, onboarded: true })
+            }} />
 
   const todayShort = DAYS_SHORT[new Date().getDay()]
   const todayKey = new Date().toISOString().slice(0,10)
@@ -340,7 +400,7 @@ export default function App() {
         {/* Header */}
         <div style={{ ...s.sb, marginBottom: 16 }}>
           <div style={{ fontSize: 26, fontWeight: 800, fontFamily: "'Fraunces', serif" }}>Weekly<span style={{ color: T.citrus }}>.</span>Fit</div>
-          {profile.startWeight && <div style={{ fontSize: 13, color: T.sub }}>Goal: −{profile.goalKg}kg / {profile.goalMonths}mo</div>}
+          {profile.startWeight && profile.goalKg && <div style={{ fontSize: 13, color: T.sub }}>Goal: −{profile.goalKg}kg / {profile.goalMonths}mo</div>}
         </div>
 
         {/* Weigh-in nudge */}
@@ -360,14 +420,14 @@ export default function App() {
             {!plan && !busy && (
               <div style={{ ...s.card, textAlign: 'center', padding: 44 }}>
                 <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>No plan yet</div>
-                <p style={{ color: T.sub, marginBottom: 20 }}>Get your week of meals, workouts, and a grocery list.</p>
+                <p style={{ color: T.sub, marginBottom: 20 }}>Get your week of meals, workouts, and a grocery list — generated by {PROVIDER_NAMES[apiProvider] || 'AI'}.</p>
                 <button style={s.btn} onClick={() => setModal(true)}>Plan my week</button>
               </div>
             )}
             {busy && (
               <div style={{ ...s.card, textAlign: 'center', padding: 44 }}>
                 <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Building your week…</div>
-                <p style={{ color: T.sub }}>Balancing nutrition, varying meals, splitting groceries.</p>
+                <p style={{ color: T.sub }}>Asking {PROVIDER_NAMES[apiProvider] || 'AI'} to balance nutrition, vary meals, split groceries.</p>
                 <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: 8 }}>
                   {[0,1,2].map(i => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: T.green, animation: `pulse 1.2s ${i*0.4}s infinite` }} />)}
                 </div>
@@ -380,6 +440,26 @@ export default function App() {
                   <span style={s.lbl}>Workouts this week</span>
                   <WeekRibbon days={plan.days} />
                   {plan.weekSummary && <p style={{ fontSize: 14, color: T.sub, marginTop: 12, marginBottom: 0 }}>{plan.weekSummary}</p>}
+                  {plan.workoutBalance && (
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                      {[
+                        { label: '💪 Strength', val: plan.workoutBalance.strengthDays, good: plan.workoutBalance.strengthDays >= 2 },
+                        { label: '🏃 Cardio', val: plan.workoutBalance.cardioDays, good: plan.workoutBalance.cardioDays >= 2 },
+                        { label: '🧘 Flexibility', val: plan.workoutBalance.flexDays, good: plan.workoutBalance.flexDays >= 1 },
+                        { label: '😴 Rest', val: plan.workoutBalance.restDays, good: plan.workoutBalance.restDays >= 1 },
+                      ].map(item => (
+                        <div key={item.label} style={{ flex: 1, minWidth: 70, textAlign: 'center', background: item.good ? T.greenLight : '#FFF3F3', borderRadius: 10, padding: '8px 4px', border: `1px solid ${item.good ? '#C5DFC8' : '#F5C6C6'}` }}>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: item.good ? T.green : T.red }}>{item.val}</div>
+                          <div style={{ fontSize: 11, color: T.sub }}>{item.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {plan.workoutWarning && (
+                    <div style={{ marginTop: 10, padding: '10px 12px', background: '#FFF3F3', borderRadius: 10, border: '1px solid #F5C6C6', fontSize: 13, color: T.red }}>
+                      ⚠️ {plan.workoutWarning}
+                    </div>
+                  )}
                 </div>
                 {plan.days.map(d => {
                   const isToday = d.day === todayShort
@@ -552,7 +632,7 @@ export default function App() {
           <div style={s.grid()}>
             {/* API */}
             <div style={s.card}>
-              <span style={s.lbl}>AI Provider</span>
+              <span style={s.lbl}>AI Provider — currently using {PROVIDER_NAMES[apiProvider] || apiProvider}</span>
               <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 14 }}>
                 {[['groq','Groq (free ⚡)'],['openrouter','OpenRouter (free)'],['gemini','Gemini (free)'],['claude','Claude']].map(([id, label]) => (
                   <Chip key={id} on={apiProvider === id} onClick={() => { setApiProvider(id); saveApiProvider(id) }}>{label}</Chip>
