@@ -33,7 +33,7 @@ function SlotRow({ color, emoji, label, children }) {
 // ── ONBOARDING ────────────────────────────────────────────────
 function Onboarding({ onDone }) {
   const [step, setStep] = useState(0)
-  const [p, setP] = useState({ ...DEFAULT_PROFILE })
+  const [p, setP] = useState({ ...DEFAULT_PROFILE, apiKey: loadApiKey(), apiProvider: loadApiProvider() || 'groq' })
   const [storeIn, setStoreIn] = useState('')
   const [stapleIn, setStapleIn] = useState('')
 
@@ -728,9 +728,13 @@ export default function App() {
             </div>
             <button style={s.ghostRed} onClick={() => {
               clearAll()
+              const currentKey = loadApiKey()
+              const currentProvider = loadApiProvider()
               setProfile({ ...DEFAULT_PROFILE })
               setPlan(null); setWeights([]); setChecked({}); setTab('week')
-              // Keep API key and provider — user shouldn't have to re-enter these
+              // Restore API key and provider — these should never be wiped
+              setApiKey(currentKey)
+              setApiProvider(currentProvider)
             }}>Reset everything</button>
           </div>
         )}
