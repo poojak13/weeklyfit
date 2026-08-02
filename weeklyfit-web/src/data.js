@@ -48,8 +48,9 @@ export const FUN_MEALS = {
 export const DEFAULT_PROFILE = {
   diet: 'No restriction', ethnicities: [],
   allergies: [], avoids: [], customAvoid: '',
-  goalKg: 6, goalMonths: 3, startWeight: '', heightCm: '',
-  stores: [], mealsPerDay: 1, mealSlots: ['dinner'],
+  goalKg: '', goalMonths: '', startWeight: '', heightCm: '',
+  stores: [], mealsPerDay: 3, mealSlots: ['dinner'],
+  leftoverLunch: false,
   exercisePrefs: [], ytChannels: {}, staples: [],
   snackPref: 'store-bought', onboarded: false,
 }
