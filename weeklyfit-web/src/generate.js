@@ -9,8 +9,11 @@ function buildPrompt(profile, weights, lastPlan, feedback, pantry, eatOut, eatOu
   const lNote = lastPlan
     ? 'Last week dinners: ' + lastPlan.days.map(d => d.dinner.name).join(', ') + '. Do not repeat.'
     : 'First week.'
-  const leftoverRule = slots.includes('lunch') && slots.includes('dinner')
-    ? 'LEFTOVER RULE: Mon lunch = "Leftovers from last week". Tue-Sun lunch = "Leftovers from [prev night dinner]". Lunch is never a new recipe.'
+  const isLeftoverLunch = profile.leftoverLunch === true
+  const leftoverRule = isLeftoverLunch
+    ? 'LEFTOVER RULE: Mon lunch = "Leftovers from last week". Tue-Sun lunch = "Leftovers from [prev night dinner]". Lunch is NEVER a new recipe — always last night dinner name only.'
+    : slots.includes('lunch')
+    ? 'Lunch is a FRESHLY COOKED meal — give it a name, desc, calories, proteinG just like dinner. Do NOT make it leftovers.'
     : ''
   const proteinTarget = profile.startWeight ? Math.round(parseFloat(profile.startWeight) * 1.8) + 'g' : '120g'
   const ytNote = Object.entries(profile.ytChannels||{}).filter(([,v]) => v?.trim()).map(([k,v]) => `${k}:${v}`).join(';')
@@ -141,9 +144,9 @@ export async function generatePlan(profile, weights, lastPlan, feedback, pantry,
 
   const plan = JSON.parse(text.slice(start, end + 1))
 
-  // Inject real leftover names client-side
+  // Inject real leftover names client-side — only in leftover mode
   const slots = profile.mealSlots || ['dinner']
-  if (slots.includes('lunch')) {
+  if (profile.leftoverLunch && slots.includes('lunch')) {
     plan.days.forEach((d, i) => {
       if (i === 0) { if (d.lunch) d.lunch.idea = 'Leftovers from last week' }
       else { const prev = plan.days[i-1].dinner; if (d.lunch && prev) d.lunch.idea = `Leftovers: ${prev.name}` }
