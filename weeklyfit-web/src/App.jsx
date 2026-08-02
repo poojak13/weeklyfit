@@ -554,21 +554,30 @@ export default function App() {
             <div style={s.card}>
               <span style={s.lbl}>AI Provider</span>
               <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 14 }}>
-                {[['claude','Claude (Anthropic)'],['gemini','Gemini (Google)']].map(([id, label]) => (
+                {[['groq','Groq (free ⚡)'],['openrouter','OpenRouter (free)'],['gemini','Gemini (free)'],['claude','Claude']].map(([id, label]) => (
                   <Chip key={id} on={apiProvider === id} onClick={() => { setApiProvider(id); saveApiProvider(id) }}>{label}</Chip>
                 ))}
               </div>
               <span style={s.lbl}>API Key</span>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input style={s.inp} type={showKey ? 'text' : 'password'}
-                  placeholder={apiProvider === 'gemini' ? 'AIza… from aistudio.google.com/app/apikey' : 'sk-ant-… from console.anthropic.com'}
+                  placeholder={
+                    apiProvider === 'groq' ? 'gsk_… from console.groq.com (free, no billing)' :
+                    apiProvider === 'openrouter' ? 'sk-or-… from openrouter.ai/keys (free, no billing)' :
+                    apiProvider === 'gemini' ? 'AIza… from aistudio.google.com/app/apikey (free)' :
+                    'sk-ant-… from console.anthropic.com'
+                  }
                   value={apiKey} onChange={e => { setApiKey(e.target.value); saveApiKey(e.target.value) }} />
                 <button style={{ ...s.ghost, padding: '11px 14px', whiteSpace: 'nowrap' }} onClick={() => setShowKey(!showKey)}>{showKey ? 'Hide' : 'Show'}</button>
               </div>
               <div style={{ fontSize: 12, color: T.sub, marginTop: 8 }}>
-                {apiProvider === 'gemini'
-                  ? '✅ Gemini works directly from any browser — no backend needed. Get a free key at aistudio.google.com'
-                  : '✅ Claude works here. Get your own key at console.anthropic.com for production use.'}
+                {apiProvider === 'groq'
+                  ? '⚡ Fastest — plans generate in 2-3 seconds. Completely free, no billing ever. console.groq.com'
+                  : apiProvider === 'openrouter'
+                  ? '🔀 Access to 10+ free models. No billing ever. openrouter.ai/keys'
+                  : apiProvider === 'gemini'
+                  ? '✅ Free tier — 1,500 requests/day. aistudio.google.com/app/apikey'
+                  : '✅ Best quality. Paid — console.anthropic.com'}
               </div>
             </div>
             {/* Diet */}
