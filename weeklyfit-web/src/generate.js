@@ -76,7 +76,19 @@ export async function generatePlan(profile, weights, lastPlan, feedback, pantry,
 
   let url, headers, body, getText
 
-  if (apiProvider === 'gemini') {
+  if (apiProvider === 'groq') {
+    if (!apiKey?.trim()) throw new Error('Groq API key required. Get one free at console.groq.com')
+    url = 'https://api.groq.com/openai/v1/chat/completions'
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` }
+    body = JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 6000, temperature: 0.7, messages: [{ role: 'user', content: prompt }] })
+    getText = data => data?.choices?.[0]?.message?.content || ''
+  } else if (apiProvider === 'openrouter') {
+    if (!apiKey?.trim()) throw new Error('OpenRouter API key required. Get one free at openrouter.ai/keys')
+    url = 'https://openrouter.ai/api/v1/chat/completions'
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}`, 'HTTP-Referer': 'https://weeklyfit.app', 'X-Title': 'WeeklyFit' }
+    body = JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct:free', max_tokens: 6000, messages: [{ role: 'user', content: prompt }] })
+    getText = data => data?.choices?.[0]?.message?.content || ''
+  } else if (apiProvider === 'gemini') {
     if (!apiKey?.trim()) throw new Error('Gemini API key required. Get one free at aistudio.google.com/app/apikey')
     const model = 'gemini-2.0-flash'
     url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`
