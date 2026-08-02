@@ -11,7 +11,7 @@ A personal weekly meal planner and workout tracker powered by AI. Tell it your c
 - Plans your week based on your cuisine background (Indian, East Asian, Mediterranean, Mexican, etc.)
 - Respects your diet type, allergies, and foods you avoid
 - Supports 5 meal configurations: breakfast only, lunch only, dinner only, lunch (leftovers) + dinner, or all 3 meals
-- When you pick "lunch + dinner", lunch is always last night's dinner — zero extra cooking
+- When you pick "lunch + dinner", lunch is always last night's dinner. Zero extra cooking
 - Includes one fun meal per week (chaat, ramen, nacho plate, shakshuka, etc.)
 - Avoids deep-fried daily mains and keeps meals balanced for your weight goal
 - South Indian, North Indian, East Asian, Mediterranean and rotates so you don't eat the same thing every day
@@ -34,7 +34,7 @@ A personal weekly meal planner and workout tracker powered by AI. Tell it your c
 
 **Progress tracking**
 - Weekly weigh-in reminders
-- Weight trend chart (2-week rolling — filters out daily water weight noise)
+- Weight trend chart (2-week rolling and filters out daily water weight noise)
 - Daily checklist: 10,000 steps · today's workout · followed meals
 - Streak counter
 
