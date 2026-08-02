@@ -15,14 +15,6 @@ const PROVIDER_NAMES = {
   claude: 'Claude',
 }
 
-const MEAL_OPTIONS = [
-    { n:1, l:'Breakfast only',              d:'Just breakfast — great if you meal prep mornings.',                          slots:['breakfast'],              leftoverLunch:false },
-    { n:2, l:'Lunch only',                  d:'Just lunch — cooked fresh each day.',                                        slots:['lunch'],                  leftoverLunch:false },
-    { n:3, l:'Dinner only',                 d:'One solid dinner each night. You handle the rest.',                          slots:['dinner'],                  leftoverLunch:false },
-    { n:4, l:'Lunch (leftovers) + Dinner',  d:"Cook dinner once — next day's lunch is last night's dinner. Zero extra cooking.", slots:['lunch','dinner'],    leftoverLunch:true  },
-    { n:5, l:'All 3 meals',                 d:'Breakfast + fresh cooked lunch + dinner. Full day coverage.',                slots:['breakfast','lunch','dinner'], leftoverLunch:false },
-  ]
-
 function Badge({ color, children }) {
   return <span style={{ fontSize: 11, fontWeight: 700, background: color, color: '#fff', padding: '2px 8px', borderRadius: 99, marginLeft: 4 }}>{children}</span>
 }
@@ -39,6 +31,14 @@ function SlotRow({ color, emoji, label, children }) {
 }
 
 // ── ONBOARDING ────────────────────────────────────────────────
+const MEAL_OPTIONS = [
+  { n:1, l:'Breakfast only',              d:'Just breakfast — great if you meal prep mornings.',                              slots:['breakfast'],               leftoverLunch:false },
+  { n:2, l:'Lunch only',                  d:'Just lunch — cooked fresh each day.',                                            slots:['lunch'],                   leftoverLunch:false },
+  { n:3, l:'Dinner only',                 d:'One solid dinner each night. You handle the rest.',                              slots:['dinner'],                   leftoverLunch:false },
+  { n:4, l:'Lunch (leftovers) + Dinner',  d:"Cook dinner once — next day's lunch is last night's dinner. Zero extra cooking.", slots:['lunch','dinner'],          leftoverLunch:true  },
+  { n:5, l:'All 3 meals',                 d:'Breakfast + fresh cooked lunch + dinner. Full day coverage.',                    slots:['breakfast','lunch','dinner'],leftoverLunch:false },
+]
+
 function Onboarding({ onDone }) {
   const [step, setStep] = useState(0)
   const [p, setP] = useState({ ...DEFAULT_PROFILE, apiKey: loadApiKey(), apiProvider: loadApiProvider() || 'groq' })
@@ -61,7 +61,6 @@ function Onboarding({ onDone }) {
       return { ...prev, [field]: cur.includes(val) ? cur.filter(x => x !== val) : [...cur, val] }
     })
   }
-
 
   const setMeals = n => {
     const opt = MEAL_OPTIONS.find(o => o.n === n)
@@ -274,6 +273,7 @@ function Onboarding({ onDone }) {
           Weekly<span style={{ color: T.citrus }}>.</span>Fit
         </div>
         <div style={{ color: T.sub, marginTop: 4 }}>One plan a week. Varied food, varied movement.</div>
+        <div style={{ fontSize: 11, color: T.sub, marginTop: 8, lineHeight: 1.5 }}>Hobby project · AI-generated approximations only · Not medical or nutrition advice</div>
       </div>
       <div style={s.card}>
         <div style={{ display: 'flex', gap: 3, marginBottom: 16 }}>
@@ -412,6 +412,11 @@ export default function App() {
           {profile.startWeight && profile.goalKg && <div style={{ fontSize: 13, color: T.sub }}>Goal: −{profile.goalKg}kg / {profile.goalMonths}mo</div>}
         </div>
 
+        {/* Disclaimer */}
+        <div style={{ fontSize: 12, color: T.sub, background: T.paper, border: `1px solid ${T.line}`, borderRadius: 10, padding: '10px 14px', marginBottom: 12, lineHeight: 1.6 }}>
+          ⚠️ <strong>Hobby project.</strong> Nutrition values, calorie counts, and exercise recommendations are AI-generated approximations — not reviewed by a doctor, dietitian, or certified trainer. Always consult a professional before making significant changes to your diet or exercise routine.
+        </div>
+
         {/* Weigh-in nudge */}
         {(daysSinceWeigh === null || daysSinceWeigh >= 7) && (
           <div style={{ ...s.card, background: T.citrusSoft, borderColor: '#EAD9A8', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -488,7 +493,16 @@ export default function App() {
                         {wk && <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: MODALITY_COLOR[wk.modality] || T.sub, padding: '3px 10px', borderRadius: 999 }}>{wk.modality === 'Weight lifting' ? 'Weights' : wk.modality}</span>}
                       </div>
                       {d.breakfast && <SlotRow color={T.line} emoji="🍳" label="Breakfast"><div style={{ fontWeight: 600 }}>{d.breakfast.name}</div><div style={{ fontSize: 13, color: T.sub }}>{d.breakfast.desc}{d.breakfast.proteinG ? ` · ${d.breakfast.proteinG}g protein` : ''}</div></SlotRow>}
-                      {d.lunch && <SlotRow color={T.line} emoji="🥗" label="Lunch"><div style={{ fontSize: 14, color: T.sub, fontStyle: 'italic' }}>{d.lunch.idea}</div></SlotRow>}
+                      {d.lunch && (
+                        d.lunch.name
+                          ? <SlotRow color={T.green} emoji="🥗" label="Lunch">
+                              <div style={{ fontWeight: 700, fontSize: 15 }}>{d.lunch.name}</div>
+                              <div style={{ fontSize: 13, color: T.sub }}>{d.lunch.desc}{d.lunch.proteinG ? ` · ${d.lunch.proteinG}g protein` : ''}</div>
+                            </SlotRow>
+                          : <SlotRow color={T.line} emoji="🥗" label="Lunch">
+                              <div style={{ fontSize: 14, color: T.sub, fontStyle: 'italic' }}>{d.lunch.idea}</div>
+                            </SlotRow>
+                      )}
                       {d.dinner && <SlotRow color={T.green} emoji="🍽️" label={`Dinner${hasFun?' 🎉':''}${hasEatOut?' 🍴':''}`}><div style={{ fontWeight: 700, fontSize: 15 }}>{d.dinner.name}</div><div style={{ fontSize: 13, color: T.sub }}>{d.dinner.desc}{d.dinner.proteinG ? ` · ${d.dinner.proteinG}g protein` : ''}</div></SlotRow>}
                       {wk && wk.modality !== 'Rest' && (
                         <SlotRow color={MODALITY_COLOR[wk.modality] || T.line} emoji="💪" label={wk.modality + (wk.focus ? ` · ${wk.focus}` : '')}>
@@ -564,7 +578,16 @@ export default function App() {
                 <div style={s.card}>
                   <span style={s.lbl}>Today's meals</span>
                   {todayPlan.breakfast && <SlotRow color={T.line} emoji="🍳" label="Breakfast"><div style={{ fontWeight: 600 }}>{todayPlan.breakfast.name}</div><div style={{ fontSize: 13, color: T.sub }}>{todayPlan.breakfast.desc}</div></SlotRow>}
-                  {todayPlan.lunch && <SlotRow color={T.line} emoji="🥗" label="Lunch"><div style={{ fontSize: 14, color: T.sub, fontStyle: 'italic' }}>{todayPlan.lunch.idea}</div></SlotRow>}
+                  {todayPlan.lunch && (
+                    todayPlan.lunch.name
+                      ? <SlotRow color={T.green} emoji="🥗" label="Lunch">
+                          <div style={{ fontWeight: 700 }}>{todayPlan.lunch.name}</div>
+                          <div style={{ fontSize: 13, color: T.sub }}>{todayPlan.lunch.desc}</div>
+                        </SlotRow>
+                      : <SlotRow color={T.line} emoji="🥗" label="Lunch">
+                          <div style={{ fontSize: 14, color: T.sub, fontStyle: 'italic' }}>{todayPlan.lunch.idea}</div>
+                        </SlotRow>
+                  )}
                   {todayPlan.dinner && <SlotRow color={T.green} emoji="🍽️" label="Dinner"><div style={{ fontWeight: 700 }}>{todayPlan.dinner.name}</div><div style={{ fontSize: 13, color: T.sub }}>{todayPlan.dinner.desc}</div></SlotRow>}
                 </div>
               )}
