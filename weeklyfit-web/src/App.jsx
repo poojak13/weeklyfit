@@ -54,9 +54,17 @@ function Onboarding({ onDone }) {
     })
   }
 
+  const MEAL_OPTIONS = [
+    { n:1, l:'Breakfast only',              d:'Just breakfast — great if you meal prep mornings.',                          slots:['breakfast'],              leftoverLunch:false },
+    { n:2, l:'Lunch only',                  d:'Just lunch — cooked fresh each day.',                                        slots:['lunch'],                  leftoverLunch:false },
+    { n:3, l:'Dinner only',                 d:'One solid dinner each night. You handle the rest.',                          slots:['dinner'],                  leftoverLunch:false },
+    { n:4, l:'Lunch (leftovers) + Dinner',  d:"Cook dinner once — next day's lunch is last night's dinner. Zero extra cooking.", slots:['lunch','dinner'],    leftoverLunch:true  },
+    { n:5, l:'All 3 meals',                 d:'Breakfast + fresh cooked lunch + dinner. Full day coverage.',                slots:['breakfast','lunch','dinner'], leftoverLunch:false },
+  ]
+
   const setMeals = n => {
-    const slots = n === 1 ? ['dinner'] : n === 2 ? ['lunch','dinner'] : ['breakfast','lunch','dinner']
-    up({ mealsPerDay: n, mealSlots: slots })
+    const opt = MEAL_OPTIONS.find(o => o.n === n)
+    if (opt) up({ mealsPerDay: n, mealSlots: opt.slots, leftoverLunch: opt.leftoverLunch })
   }
 
   const steps = [
@@ -171,14 +179,14 @@ function Onboarding({ onDone }) {
       body: (
         <div style={s.grid(10)}>
           <p style={{ color: T.sub, fontSize: 14 }}>Each planned meal hits your protein target — fewer meals just means each works harder.</p>
-          {[
-            { n: 1, l: '1 meal — Dinner only', d: 'You handle breakfast and lunch. We plan one solid dinner each night.' },
-            { n: 2, l: '2 meals — Lunch + Dinner', d: "Lunch = yesterday's dinner leftovers (zero extra cooking). Fresh dinner each night." },
-            { n: 3, l: '3 meals — All three', d: 'Quick 10-min breakfast. Lunch = leftovers. Full coverage.' },
-          ].map(opt => (
+          {MEAL_OPTIONS.map(opt => (
             <label key={opt.n} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer', ...s.card, borderColor: p.mealsPerDay === opt.n ? T.green : T.line }}>
               <input type="radio" checked={p.mealsPerDay === opt.n} onChange={() => setMeals(opt.n)} style={{ marginTop: 3, accentColor: T.green }} />
-              <div><div style={{ fontWeight: 700 }}>{opt.l}</div><div style={{ fontSize: 13, color: T.sub, marginTop: 2 }}>{opt.d}</div></div>
+              <div>
+                <div style={{ fontWeight: 700 }}>{opt.l}</div>
+                <div style={{ fontSize: 13, color: T.sub, marginTop: 2 }}>{opt.d}</div>
+                {opt.leftoverLunch && <div style={{ fontSize: 12, marginTop: 4, color: T.green, fontWeight: 600 }}>🍱 Lunch = last night's dinner leftovers</div>}
+              </div>
             </label>
           ))}
           <div>
@@ -690,13 +698,15 @@ export default function App() {
             {/* Meals */}
             <div style={s.card}>
               <span style={s.lbl}>Meals per day</span>
-              {[{n:1,l:'1 — Dinner only'},{n:2,l:'2 — Lunch (leftovers) + Dinner'},{n:3,l:'3 — Breakfast + Lunch + Dinner'}].map(opt => (
-                <label key={opt.n} style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer', padding: '10px 0', borderBottom: `1px solid ${T.line}` }}>
+              {MEAL_OPTIONS.map(opt => (
+                <label key={opt.n} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', padding: '10px 0', borderBottom: `1px solid ${T.line}` }}>
                   <input type="radio" checked={profile.mealsPerDay === opt.n} onChange={() => {
-                    const slots = opt.n === 1 ? ['dinner'] : opt.n === 2 ? ['lunch','dinner'] : ['breakfast','lunch','dinner']
-                    persist({ ...profile, mealsPerDay: opt.n, mealSlots: slots })
-                  }} style={{ accentColor: T.green }} />
-                  <span style={{ fontWeight: 600 }}>{opt.l}</span>
+                    persist({ ...profile, mealsPerDay: opt.n, mealSlots: opt.slots, leftoverLunch: opt.leftoverLunch })
+                  }} style={{ marginTop: 3, accentColor: T.green }} />
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{opt.l}</div>
+                    {opt.leftoverLunch && <div style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>🍱 Lunch = last night's dinner leftovers</div>}
+                  </div>
                 </label>
               ))}
             </div>
