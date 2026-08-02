@@ -23,7 +23,7 @@ function buildPrompt(profile, weights, lastPlan, feedback, pantry, eatOut, eatOu
     'USER PROFILE:',
     `- Diet: ${profile.diet}${avoids.length ? ', avoid: '+avoids.join(', ') : ''}`,
     `- Cuisines (ONLY suggest meals from these, do not default to other cuisines): ${profile.ethnicities.length ? profile.ethnicities.join(', ') : 'varied international'}`,
-    `- Goal: lose ${profile.goalKg}kg in ${profile.goalMonths} months${profile.startWeight ? ', current '+profile.startWeight+'kg' : ''}`,
+    profile.goalKg && profile.goalMonths ? `- Weight loss goal: lose ${profile.goalKg}kg in ${profile.goalMonths} months${profile.startWeight ? ', current '+profile.startWeight+'kg' : ''}` : `- No specific weight goal set — focus on balanced, healthy meals`,
     `- Meal slots per day: ${slots.join(', ')}`,
     `- Stores (ONLY use these exact stores, no others): ${(profile.stores||[]).length ? profile.stores.join(', ') : 'any store'}`,
     `- Staples (never add to grocery list): ${(profile.staples||[]).slice(0,15).join(', ')||'none'}`,
@@ -36,24 +36,39 @@ function buildPrompt(profile, weights, lastPlan, feedback, pantry, eatOut, eatOu
     '',
     leftoverRule,
     '',
-    `WEIGHT LOSS RULES (lose ${profile.goalKg}kg in ${profile.goalMonths} months = ~500 kcal/day deficit):`,
+    profile.goalKg && profile.goalMonths ? `WEIGHT LOSS RULES (lose ${profile.goalKg}kg in ${profile.goalMonths} months = ~500 kcal/day deficit):` : 'NUTRITION RULES (balanced healthy eating):',
     '- Rice is fine in 3/4 cup portions paired with high-protein side',
     '- Roti is fine, 2 whole wheat rotis per meal',
     '- NO deep-fried mains daily: poori, bhatura, puri, kachori',
     '- NO heavy cream curries every day',
     '- EVERY dinner must have protein (dal, rajma, chole, paneer, tofu, eggs, legumes) AND a vegetable',
     '- Dinner: 450-550 kcal, 25-35g protein. Breakfast: 300-400 kcal, 15-25g protein.',
-    `- Total daily protein target: ${proteinTarget}`,
+    profile.startWeight ? `- Total daily protein target: ${proteinTarget}` : '- Aim for high protein in every meal (dal, paneer, legumes, eggs, tofu)',
     '- Cooking methods: minimal oil, grilled/baked/steamed preferred',
     profile.ethnicities.includes('Indian') ? '- Include South Indian dishes (idli+sambhar, upma, uttapam, pesarattu, rasam, lemon rice) not just North Indian' : '',
     `- Fun meal options this week (pick ONE, make it fun:true): ${funOpts.slice(0,8).join(', ')||'any healthy treat meal'}`,
     '',
-    'WORKOUT RULES (evidence-based, ACSM + Schoenfeld 2016):',
-    '- Weight lifting: 2-3x/week on non-consecutive days, Push/Pull/Legs split',
-    '- Yoga/Stretching: max 1-2x/week',
-    '- Cardio: 2-3x/week between strength days. Treadmill: speed mph + incline% + duration. Swim: laps + pool size. Cycling: cadence + zone.',
-    '- 1-2 rest days, no back-to-back heavy strength',
-    '- Guided workouts: give ytSuggestion. Use MET-based calorie estimates only.',
+    'WORKOUT RULES (evidence-based, ACSM + Schoenfeld 2016). Build a BALANCED week covering all movement types:',
+    '',
+    'MANDATORY WEEKLY BALANCE — every week must include ALL of these categories:',
+    '  1. STRENGTH (2-3 days): Weight lifting on non-consecutive days (e.g. Mon/Wed/Fri or Mon/Thu/Sat). Rotate Push (chest/shoulders/triceps) → Pull (back/biceps) → Legs/glutes/core. Never do strength 2 days in a row.',
+    '  2. CARDIO (2-3 days): Running, cycling, swimming, treadmill, elliptical, rowing — on days between strength. Give exact specs: treadmill = speed mph + incline% + duration mins. Swim = laps + pool length. Cycling = cadence rpm + zone. Running = pace + distance.',
+    '  3. FLEXIBILITY/MOBILITY (1-2 days): Yoga, stretching, pilates. Max 2x/week — do not fill the week with yoga at the expense of strength or cardio.',
+    '  4. REST (1-2 days): True rest days. No back-to-back heavy strength days ever.',
+    '',
+    'FORBIDDEN PATTERNS (never do these):',
+    '  - Yoga every day or 3+ times a week',
+    '  - Walking as the only cardio (walking is supplemental, not a cardio session)',
+    '  - Same modality 3+ days in a row',
+    '  - Two strength sessions back-to-back (Mon strength + Tue strength = never)',
+    '  - All 7 days filled with exercise — must have 1-2 true rest days',
+    '',
+    'EXAMPLE BALANCED WEEK for someone who likes Yoga + Weight lifting + Swimming:',
+    '  Mon: Weight lifting (Push), Tue: Swimming 30 laps, Wed: Yoga 30min, Thu: Weight lifting (Pull), Fri: Swimming 40 laps, Sat: Weight lifting (Legs), Sun: Rest',
+    '',
+    'For guided workouts (Yoga, Weight lifting, HIIT, Pilates): give a specific ytSuggestion video/series from their preferred channel.',
+    'For cardio: give exact ACSM specs. Fat-burn zone = 60-70% HRmax. Treadmill fat-burn = 3.5-4.5mph at 3-5% incline for 45 mins.',
+    'Use MET-based calorie estimates only — never make up numbers.',
     '',
     'RETURN EXACTLY THIS JSON (7 days Mon-Sun, no extra text before or after):',
     JSON.stringify({
@@ -77,13 +92,13 @@ export async function generatePlan(profile, weights, lastPlan, feedback, pantry,
   let url, headers, body, getText
 
   if (apiProvider === 'groq') {
-    if (!apiKey?.trim()) throw new Error('Groq API key required. Get one free at console.groq.com')
+    if (!apiKey?.trim()) throw new Error('Groq API key required — get a free key at console.groq.com (no billing needed)')
     url = 'https://api.groq.com/openai/v1/chat/completions'
     headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` }
     body = JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 6000, temperature: 0.7, messages: [{ role: 'user', content: prompt }] })
     getText = data => data?.choices?.[0]?.message?.content || ''
   } else if (apiProvider === 'openrouter') {
-    if (!apiKey?.trim()) throw new Error('OpenRouter API key required. Get one free at openrouter.ai/keys')
+    if (!apiKey?.trim()) throw new Error('OpenRouter API key required — get a free key at openrouter.ai/keys (no billing needed)')
     url = 'https://openrouter.ai/api/v1/chat/completions'
     headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}`, 'HTTP-Referer': 'https://weeklyfit.app', 'X-Title': 'WeeklyFit' }
     body = JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct:free', max_tokens: 6000, messages: [{ role: 'user', content: prompt }] })
@@ -110,7 +125,7 @@ export async function generatePlan(profile, weights, lastPlan, feedback, pantry,
   const res = await fetch(url, { method: 'POST', headers, body })
   if (!res.ok) {
     const err = await res.text()
-    throw new Error(`API error ${res.status}: ${err.slice(0, 200)}`)
+    throw new Error(`${apiProvider.toUpperCase()} API error ${res.status}: ${err.slice(0, 200)}`)
   }
   const data = await res.json()
   if (data.error) throw new Error(data.error.message || JSON.stringify(data.error))
@@ -118,7 +133,7 @@ export async function generatePlan(profile, weights, lastPlan, feedback, pantry,
   const text = getText(data)
   const start = text.indexOf('{')
   const end = text.lastIndexOf('}')
-  if (start === -1) throw new Error('No JSON in response. Raw: ' + text.slice(0, 200))
+  if (start === -1) throw new Error(`${apiProvider.toUpperCase()} returned no valid JSON. Try regenerating. Raw: ` + text.slice(0, 200))
 
   const plan = JSON.parse(text.slice(start, end + 1))
 
@@ -130,6 +145,31 @@ export async function generatePlan(profile, weights, lastPlan, feedback, pantry,
       else { const prev = plan.days[i-1].dinner; if (d.lunch && prev) d.lunch.idea = `Leftovers: ${prev.name}` }
     })
   }
+
+  // Validate workout balance and warn if skewed
+  const modalityCounts = {}
+  plan.days.forEach(d => {
+    const mod = d.workout?.modality || 'Rest'
+    modalityCounts[mod] = (modalityCounts[mod] || 0) + 1
+  })
+
+  const strengthMods = ['Weight lifting','HIIT']
+  const cardioMods = ['Running','Swimming','Treadmill','Cycling','Rowing','Elliptical','Jump rope']
+  const flexMods = ['Yoga','Stretching','Pilates','Dance']
+
+  const strengthDays = strengthMods.reduce((a, m) => a + (modalityCounts[m] || 0), 0)
+  const cardioDays = cardioMods.reduce((a, m) => a + (modalityCounts[m] || 0), 0)
+  const flexDays = flexMods.reduce((a, m) => a + (modalityCounts[m] || 0), 0)
+  const restDays = (modalityCounts['Rest'] || 0) + (modalityCounts['Walking'] || 0)
+
+  // Check for any single modality dominating
+  const dominant = Object.entries(modalityCounts).find(([mod, count]) => mod !== 'Rest' && count >= 4)
+  if (dominant) {
+    console.warn(`Workout imbalance: ${dominant[0]} appears ${dominant[1]} times. Consider regenerating.`)
+    plan.workoutWarning = `This week is heavy on ${dominant[0]} (${dominant[1]} days). For best results regenerate for a more balanced mix.`
+  }
+
+  plan.workoutBalance = { strengthDays, cardioDays, flexDays, restDays }
 
   return plan
 }
