@@ -13,8 +13,9 @@ export function saveData(key, value) {
 }
 
 export function clearAll() {
+  // Only clear app data — never touch API keys (wf_apikey, wf_apiprovider)
   Object.keys(localStorage)
-    .filter(k => k.startsWith(PREFIX))
+    .filter(k => k.startsWith('wf:'))
     .forEach(k => localStorage.removeItem(k))
 }
 
