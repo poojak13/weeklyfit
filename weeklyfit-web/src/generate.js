@@ -80,15 +80,18 @@ function buildPrompt(profile, weights, lastPlan, feedback, pantry, eatOut, eatOu
     JSON.stringify({
       day: 'Mon',
       ...(slots.includes('breakfast') ? { breakfast: { name: 'Oats upma', desc: 'Savoury oats', proteinG: 12 } } : {}),
-      ...(slots.includes('lunch') ? { lunch: { idea: 'Leftovers from last week' } } : {}),
+      ...(slots.includes('lunch') && profile.leftoverLunch ? { lunch: { idea: 'Leftovers from last week' } } : {}),
+      ...(slots.includes('lunch') && !profile.leftoverLunch ? { lunch: { name: 'Rajma chawal', desc: 'Kidney beans rice bowl', proteinG: 22, fun: false, eatOut: false } } : {}),
       ...(slots.includes('dinner') ? { dinner: { name: 'Moong dal khichdi', desc: 'Light lentil rice', proteinG: 18, fun: false, eatOut: false } } : {}),
       workout: { modality: 'Weight lifting', detail: '45 min Push day — chest, shoulders, triceps', focus: 'Push', ytSuggestion: 'Jeff Nippard – Push Day PPL Series', steps: 1500 }
     }, null, 0),
     `Full response wraps 7 of these in: {"weekSummary":"...","days":[...],"grocery":[{"store":"${firstStore}","items":[{"name":"Baby spinach","qty":"200g bag"}]}]}`,
     `CRITICAL SLOT RULE: The user has chosen ${slots.length} meal(s) per day: [${slots.join(', ')}].`,
+    profile.leftoverLunch ? 'Lunch mode: LEFTOVERS — lunch is always last nights dinner name, never a new recipe.' : slots.includes('lunch') ? 'Lunch mode: FRESHLY COOKED — lunch needs name + desc + proteinG + calories, same as dinner.' : '',
     `You MUST include ONLY these meal keys in each day object: ${slots.join(', ')}.`,
-    slots.includes('breakfast') ? '' : 'DO NOT include breakfast. User did not ask for breakfast.',
-    slots.includes('lunch') ? '' : 'DO NOT include lunch. User did not ask for lunch.',
+    slots.includes('breakfast') ? '' : 'DO NOT include breakfast — user did not select it.',
+    slots.includes('lunch') && !profile.leftoverLunch ? 'Lunch is a FRESHLY COOKED meal — treat it exactly like dinner: give name, desc, calories, proteinG. It is NOT leftovers.' : '',
+    slots.includes('lunch') ? '' : 'DO NOT include lunch — user did not select it.',
     `Always include the workout key.`,
   ].filter(l => l !== undefined).join('\n')
 }
