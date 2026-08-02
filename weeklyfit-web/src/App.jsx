@@ -445,12 +445,13 @@ export default function App() {
                       {[
                         { label: '💪 Strength', val: plan.workoutBalance.strengthDays, good: plan.workoutBalance.strengthDays >= 2 },
                         { label: '🏃 Cardio', val: plan.workoutBalance.cardioDays, good: plan.workoutBalance.cardioDays >= 2 },
-                        { label: '🧘 Flexibility', val: plan.workoutBalance.flexDays, good: plan.workoutBalance.flexDays >= 1 },
+                        { label: '🧘 Flex', val: plan.workoutBalance.flexDays, good: plan.workoutBalance.flexDays >= 1 },
                         { label: '😴 Rest', val: plan.workoutBalance.restDays, good: plan.workoutBalance.restDays >= 1 },
                       ].map(item => (
-                        <div key={item.label} style={{ flex: 1, minWidth: 70, textAlign: 'center', background: item.good ? T.greenLight : '#FFF3F3', borderRadius: 10, padding: '8px 4px', border: `1px solid ${item.good ? '#C5DFC8' : '#F5C6C6'}` }}>
-                          <div style={{ fontSize: 18, fontWeight: 700, color: item.good ? T.green : T.red }}>{item.val}</div>
-                          <div style={{ fontSize: 11, color: T.sub }}>{item.label}</div>
+                        <div key={item.label} style={{ flex: 1, minWidth: 70, textAlign: 'center', background: item.good ? T.greenLight : '#FFF3F3', borderRadius: 10, padding: '10px 4px', border: `1px solid ${item.good ? '#C5DFC8' : '#F5C6C6'}` }}>
+                          <div style={{ fontSize: 22, fontWeight: 700, color: item.good ? T.green : T.red }}>{item.val}</div>
+                          <div style={{ fontSize: 10, color: T.sub, marginTop: 2 }}>{item.label}</div>
+                          <div style={{ fontSize: 10, color: item.good ? T.green : T.red, fontWeight: 600 }}>{item.val === 1 ? 'day' : 'days'}</div>
                         </div>
                       ))}
                     </div>
@@ -481,9 +482,14 @@ export default function App() {
                       {d.lunch && <SlotRow color={T.line} emoji="🥗" label="Lunch"><div style={{ fontSize: 14, color: T.sub, fontStyle: 'italic' }}>{d.lunch.idea}</div></SlotRow>}
                       {d.dinner && <SlotRow color={T.green} emoji="🍽️" label={`Dinner${hasFun?' 🎉':''}${hasEatOut?' 🍴':''}`}><div style={{ fontWeight: 700, fontSize: 15 }}>{d.dinner.name}</div><div style={{ fontSize: 13, color: T.sub }}>{d.dinner.desc}{d.dinner.proteinG ? ` · ${d.dinner.proteinG}g protein` : ''}</div></SlotRow>}
                       {wk && wk.modality !== 'Rest' && (
-                        <SlotRow color={MODALITY_COLOR[wk.modality] || T.line} emoji="💪" label={wk.modality}>
-                          <div style={{ fontSize: 13 }}>{wk.detail}</div>
-                          {wk.ytSuggestion && <div style={{ fontSize: 12, color: T.red, marginTop: 2 }}>▶ {wk.ytSuggestion}</div>}
+                        <SlotRow color={MODALITY_COLOR[wk.modality] || T.line} emoji="💪" label={wk.modality + (wk.focus ? ` · ${wk.focus}` : '')}>
+                          <div style={{ fontWeight: 600, fontSize: 14 }}>{wk.detail}</div>
+                          {wk.ytSuggestion && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, padding: '5px 8px', background: '#FFF0F0', borderRadius: 8, fontSize: 12 }}>
+                              <span style={{ color: T.red, fontWeight: 700 }}>▶ YouTube</span>
+                              <span style={{ color: T.ink }}>{wk.ytSuggestion}</span>
+                            </div>
+                          )}
                         </SlotRow>
                       )}
                     </div>
@@ -720,7 +726,12 @@ export default function App() {
                 ))}
               </div>
             </div>
-            <button style={s.ghostRed} onClick={() => { clearAll(); setProfile({ ...DEFAULT_PROFILE }); setPlan(null); setWeights([]); setChecked({}); setTab('week') }}>Reset everything</button>
+            <button style={s.ghostRed} onClick={() => {
+              clearAll()
+              setProfile({ ...DEFAULT_PROFILE })
+              setPlan(null); setWeights([]); setChecked({}); setTab('week')
+              // Keep API key and provider — user shouldn't have to re-enter these
+            }}>Reset everything</button>
           </div>
         )}
       </div>
