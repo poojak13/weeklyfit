@@ -125,15 +125,6 @@ https://YOUR_GITHUB_USERNAME.github.io/weeklyfit
 
 ---
 
-## Tech stack
-
-- **React + Vite** - frontend
-- **GitHub Pages + GitHub Actions** - hosting and CI/CD
-- **localStorage** - all data stays on your device
-- **AI providers** - Groq / OpenRouter / Gemini / Claude (your choice, your key)
-
----
-
 ## Local development
 
 ```bash
