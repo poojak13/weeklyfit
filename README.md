@@ -47,28 +47,28 @@ Try it live at **[poojak13.github.io/weeklyfit](https://poojak13.github.io/weekl
 ### First time setup (onboarding)
 
 1. **Choose your AI provider** and paste your API key (see API keys section below)
-2. **Pick your cuisine backgrounds** — this sets your meal variety and pantry staples
-3. **Set your goal** (optional) — weight, height, how much you want to lose and by when
+2. **Pick your cuisine backgrounds** - this sets your meal variety and pantry staples
+3. **Set your goal** (optional) - weight, height, how much you want to lose and by when
 4. **Choose how many meals** you want planned per day
-5. **Add your stores** — the grocery list will be split across these
-6. **Confirm your pantry staples** — pre-filled from your cuisine, never added to grocery list
-7. **Pick exercises you enjoy** — the weekly plan will mix these for full-body coverage
+5. **Add your stores** - the grocery list will be split across these
+6. **Confirm your pantry staples** - pre-filled from your cuisine, never added to grocery list
+7. **Pick exercises you enjoy** - the weekly plan will mix these for full-body coverage
 
 ### Every week
 
 1. Go to the **Week** tab → tap **Plan my week**
-2. Tell it what perishables you still have at home (optional — removes them from the grocery list)
-3. Note how last week went (optional — the AI adjusts)
+2. Tell it what perishables you still have at home (optional - removes them from the grocery list)
+3. Note how last week went (optional - the AI adjusts)
 4. Choose whether you want to eat out once this week
 5. Your 7-day plan generates in seconds
 
 ### Shopping
 
-Go to the **Grocery** tab — items are grouped by store, tap to check off as you go. Tap **✉️ Email grocery list** to send it to yourself before heading out.
+Go to the **Grocery** tab - items are grouped by store, tap to check off as you go. Tap **✉️ Email grocery list** to send it to yourself before heading out.
 
 ### Daily
 
-Check the **Today** tab — see today's meals and workout, tick off your 10,000 steps, workout, and meals as you complete them.
+Check the **Today** tab - see today's meals and workout, tick off your 10,000 steps, workout, and meals as you complete them.
 
 ---
 
@@ -83,7 +83,7 @@ WeeklyFit uses an AI model to generate your plans. You bring your own API key an
 | **Gemini** | Free tier (1,500 req/day), billing info required | 10–15 sec | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) |
 | **Claude** | Paid | 10–15 sec | [console.anthropic.com](https://console.anthropic.com) |
 
-**Recommendation:** Start with Groq — completely free, no credit card, fastest generation, and Llama 3.3 70B is more than capable for meal planning.
+**Recommendation:** Start with Groq - completely free, no credit card, fastest generation, and Llama 3.3 70B is more than capable for meal planning.
 
 ---
 
@@ -91,46 +91,46 @@ WeeklyFit uses an AI model to generate your plans. You bring your own API key an
 
 Want to host your own version? Fork this repo and deploy to GitHub Pages in a few minutes.
 
-### Step 1 — Create a GitHub repo
+### Step 1 - Create a GitHub repo
 1. Go to [github.com](https://github.com) → **+** → **New repository**
 2. Name it `weeklyfit`, set to **Public**, click **Create repository**
 
-### Step 2 — Upload the files
+### Step 2 - Upload the files
 1. Unzip the project folder on your computer
 2. On the repo page click **uploading an existing file**
 3. Drag everything inside the `weeklyfit-web` folder into the upload area
 4. Click **Commit changes**
 
-### Step 3 — Create the deploy workflow
+### Step 3 - Create the deploy workflow
 1. In your repo click **Add file → Create new file**
 2. Type `.github/workflows/deploy.yml` in the filename box
 3. Paste the contents of the included `deploy.yml` file
 4. Click **Commit new file**
 
-### Step 4 — Enable GitHub Pages
+### Step 4 - Enable GitHub Pages
 1. Go to repo **Settings → Pages**
 2. Under **Source** select **GitHub Actions**
 
-### Step 5 — Wait ~2 minutes
+### Step 5 - Wait ~2 minutes
 Go to the **Actions** tab and watch it build. When all steps show ✅ your app is live at:
 
 ```
 https://YOUR_GITHUB_USERNAME.github.io/weeklyfit
 ```
 
-### Step 6 — Install on Android
+### Step 6 - Install on Android
 1. Open the URL in **Chrome on your Android phone**
 2. Tap ⋮ → **Add to Home Screen**
-3. Works like a native app — full screen, home screen icon
+3. Works like a native app - full screen, home screen icon
 
 ---
 
 ## Tech stack
 
-- **React + Vite** — frontend
-- **GitHub Pages + GitHub Actions** — hosting and CI/CD
-- **localStorage** — all data stays on your device
-- **AI providers** — Groq / OpenRouter / Gemini / Claude (your choice, your key)
+- **React + Vite** - frontend
+- **GitHub Pages + GitHub Actions** - hosting and CI/CD
+- **localStorage** - all data stays on your device
+- **AI providers** - Groq / OpenRouter / Gemini / Claude (your choice, your key)
 
 ---
 
